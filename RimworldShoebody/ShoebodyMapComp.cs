@@ -76,7 +76,7 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
     private int _ticksSinceLastEligibleThing;
 
     // Wait longer for the sustainer to end if the map is in danger mode
-    private int MaxTicksSinceLastEligibleThing => map.dangerWatcher.DangerRating == StoryDanger.High ? 1000 : 200;
+    private int MaxTicksSinceLastEligibleThing => map.dangerWatcher.DangerRating == StoryDanger.High ? 500 : 200;
 
     private void MaintainSustainer(Thing? closestThing)
     {
