@@ -1,4 +1,6 @@
-﻿using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
 using Verse;
@@ -6,145 +8,141 @@ using Verse.Sound;
 
 namespace RimworldShoebody;
 
+/// <summary>
+///     Plays the “shoebody ambiance” near fresh human corpses or combat pawns standing on water.
+/// </summary>
 [UsedImplicitly]
-public class ShoebodyMapComp(Map map) : MapComponent(map)
+public sealed class ShoebodyMapComp(Map map) : MapComponent(map)
 {
-    private const int MaxCorpseAgeTicks = 3600; // 1 minute in real time
+    // ───────────────────────────────────────────── constants
+    private const int MaxCorpseAgeTicks = 60 * 60; // 1 real-time minute
 
     private static readonly ThingRequest CorpseThingRequest = ThingRequest.ForGroup(ThingRequestGroup.Corpse);
 
+    // ───────────────────────────────────────────── state
     private Sustainer? _sustainer;
+    private int        _ticksSinceLastEligibleThing;
+
+    // Wait longer while the map is in danger mode so music isn’t stop-start mid-raid.
+    private int MaxTicksSinceLastEligibleThing =>
+        map.dangerWatcher.DangerRating == StoryDanger.High ? 500 : 200;
 
     public Thing? CurrentShoebodyThing => _sustainer?.info.Maker.Thing;
 
-    public override void FinalizeInit()
-    {
-    }
-
+    // ───────────────────────────────────────────── tick loop
     public override void MapComponentTick()
     {
-        if (ShoebodyModSettings.CurrentEnabledSetting)
+        if (!ShoebodyModSettings.CurrentEnabledSetting)
         {
-            // TODO: If a sustainer exists in two maps, only the latest one will play
-            // but the music will still fade out in the earlier map as if its sustainer is still playing.
-            // Only really a problem if base gets raided while fighting in another map.
-            var closestThing = FindClosestEligibleThing();
-            MaintainSustainer(closestThing);
-        }
-        else
-        {
-            // Shoebody is disabled, kill any existing sustainers
-            if (!(_sustainer == null || _sustainer.Ended))
-            {
-                _sustainer.End();
-            }
-
-            _sustainer = null;
-        }
-    }
-
-    private Thing? FindClosestEligibleThing()
-    {
-        // Find human-like corpses above water that are not too old
-        var corpseInnerPawns = map.listerThings.ThingsMatching(CorpseThingRequest)
-            .Where(thing => IsEligibleCorpse((Corpse)thing))
-            .Where(IsOverWater);
-
-        // Find human-like pawns above water where any of the following are true:
-        //  - Pawn is drafted while map is in danger mode
-        //  - Pawn is attacking
-        //  - Pawn is downed
-        //  - Pawn is carrying a corpse that meets the corpse eligibility
-        var pawnThings = map.mapPawns.AllHumanlikeSpawned
-            .Where(IsOverWater)
-            .Where(pawn => (map.dangerWatcher.DangerRating == StoryDanger.High && pawn.Drafted)
-                           || pawn.IsAttacking()
-                           || pawn.Downed
-                           || (pawn.carryTracker.CarriedThing is Corpse corpse && IsEligibleCorpse(corpse)));
-
-        var eligibleThings = corpseInnerPawns.Concat(pawnThings);
-
-        var cameraPos = Find.CameraDriver.MapPosition;
-
-        var closestThing = eligibleThings
-            .OrderBy(thing => IntVec3Utility.ManhattanDistanceFlat(thing.Position, cameraPos))
-            .FirstOrDefault();
-
-        return closestThing;
-    }
-
-    private int _ticksSinceLastEligibleThing;
-
-    // Wait longer for the sustainer to end if the map is in danger mode
-    private int MaxTicksSinceLastEligibleThing => map.dangerWatcher.DangerRating == StoryDanger.High ? 500 : 200;
-
-    private void MaintainSustainer(Thing? closestThing)
-    {
-        // Sustainer not running
-        if (_sustainer == null)
-        {
-            // No eligible thing, do nothing
-            if (closestThing == null)
-            {
-                return;
-            }
-
-            // There is an eligible thing, start sustainer
-            _ticksSinceLastEligibleThing = 0;
-            _sustainer = ShoebodySustainerHelpers.Create(closestThing);
+            KillSustainer();
             return;
         }
-        
-        // Update volume in case setting changed
-        // TODO: trigger with event instead
+
+        var cameraPos   = Find.CameraDriver.MapPosition;
+        var viewRect    = Find.CameraDriver.CurrentViewRect;
+        var closestThing = FindClosestEligibleThing(cameraPos);
+
+        MaintainSustainer(closestThing, viewRect);
+    }
+
+    // ───────────────────────────────────────────── core logic
+    private Thing? FindClosestEligibleThing(IntVec3 cameraPos)
+    {
+        var candidates   = ListPool<Thing>.Get();
+        AddEligibleCorpses(candidates);
+        AddEligiblePawns(candidates);
+
+        var closest = candidates
+            .OrderBy(t => IntVec3Utility.ManhattanDistanceFlat(t.Position, cameraPos))
+            .FirstOrDefault();
+
+        ListPool<Thing>.Return(candidates);
+        return closest;
+    }
+
+    private void MaintainSustainer(Thing? closestThing, CellRect viewRect)
+    {
+        // no sustainer yet → try to start one when we have a target
+        if (_sustainer is null || _sustainer.Ended)
+        {
+            if (closestThing == null) return;
+
+            TryStartSustainer(closestThing);
+            return;
+        }
+
         _sustainer.externalParams["ShoebodySound_VolumeParam"] = ShoebodyModSettings.CurrentVolumeSetting;
 
-        // prevClosestThing is the closest eligible thing from the last time SoundInfo was updated
-        var prevClosestThing = _sustainer.info.Maker.Thing;
+        var prevThing = _sustainer.info.Maker.Thing;
+        if (prevThing == closestThing) return;
 
-        if (prevClosestThing != closestThing)
+        // decide whether to keep, switch, or stop
+        if (closestThing is null || ShouldPreferOldTarget(prevThing, closestThing, viewRect))
         {
-            if (closestThing != null && _ticksSinceLastEligibleThing <= MaxTicksSinceLastEligibleThing)
-            {
-                // If prevClosestThing is still on-camera and new closestThing is off-camera,
-                // treat it as if there is no new eligible thing and keep sound on prev thing
-                var rect = Find.CameraDriver.CurrentViewRect;
-                var newPos = closestThing.Position;
-                var newVisible = rect.minX <= newPos.x
-                                 && newPos.x <= rect.maxX
-                                 && rect.minZ <= newPos.z
-                                 && newPos.z <= rect.maxZ;
-                var prevPos = prevClosestThing.Position;
-                var prevVisible = rect.minX <= prevPos.x
-                                  && prevPos.x <= rect.maxX
-                                  && rect.minZ <= prevPos.z
-                                  && prevPos.z <= rect.maxZ;
-                if (prevVisible && !newVisible)
-                {
-                    closestThing = null;
-                }
-            }
+            if (++_ticksSinceLastEligibleThing <= MaxTicksSinceLastEligibleThing) return;
+            KillSustainer();
+            return;
+        }
 
-            // If new closestThing is null (or off-camera while prev is on-camera),
-            // increment tick counter and end if it's been long enough
-            if (closestThing == null)
-            {
-                if (++_ticksSinceLastEligibleThing > MaxTicksSinceLastEligibleThing)
-                {
-                    _sustainer.End();
-                    _sustainer = null;
-                }
+        // switch to the new target
+        _ticksSinceLastEligibleThing = 0;
+        _sustainer.info              = SoundInfo.InMap(closestThing);
+    }
 
-                return;
-            }
-
-            // Otherwise replace SoundInfo with the new closest thing
-            _sustainer.info = SoundInfo.InMap(closestThing);
+    // ───────────────────────────────────────────── helpers
+    private void TryStartSustainer(Thing thing)
+    {
+        try
+        {
+            _ticksSinceLastEligibleThing = 0;
+            _sustainer                   = ShoebodySustainerHelpers.Create(thing);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"[Shoebody] Failed to create sustainer: {ex}");
         }
     }
 
-    private bool IsOverWater(Thing thing) => map.terrainGrid.TerrainAt(thing.Position).IsWater;
+    private void KillSustainer()
+    {
+        _sustainer?.End();
+        _sustainer = null;
+        _ticksSinceLastEligibleThing = 0;
+    }
 
-    private static bool IsEligibleCorpse(Corpse corpse) =>
-        (corpse.InnerPawn?.RaceProps.Humanlike ?? false) && corpse.Age < MaxCorpseAgeTicks;
+    private static bool ShouldPreferOldTarget(Thing oldT, Thing newT, CellRect viewRect)
+    {
+        // keep the old one if it’s on-camera and the new one isn’t
+        bool OldVisible() => viewRect.Contains(oldT.Position);
+        bool NewVisible() => viewRect.Contains(newT.Position);
+        return OldVisible() && !NewVisible();
+    }
+
+    private void AddEligibleCorpses(List<Thing> list)
+    {
+        foreach (var thing in map.listerThings.ThingsMatching(CorpseThingRequest))
+        {
+            if (thing is Corpse corpse && IsEligibleCorpse(corpse) && IsOverWater(corpse))
+                list.Add(corpse);
+        }
+    }
+
+    private void AddEligiblePawns(List<Thing> list)
+    {
+        bool raidOngoing = map.dangerWatcher.DangerRating == StoryDanger.High;
+
+        foreach (var pawn in map.mapPawns.AllHumanlikeSpawned)
+        {
+            if (!IsOverWater(pawn)) continue;
+
+            bool isCombatPawn = raidOngoing && pawn.Drafted || pawn.IsAttacking() || pawn.Downed;
+            bool carryingCorpse = pawn.carryTracker.CarriedThing is Corpse c && IsEligibleCorpse(c);
+
+            if (isCombatPawn || carryingCorpse)
+                list.Add(pawn);
+        }
+    }
+
+    private bool IsOverWater(Thing t)    => map.terrainGrid.TerrainAt(t.Position).IsWater;
+    private static bool IsEligibleCorpse(Corpse c) => c.InnerPawn?.RaceProps.Humanlike is true && c.Age < MaxCorpseAgeTicks;
 }
