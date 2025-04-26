@@ -19,11 +19,20 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
 
     public override void MapComponentTick()
     {
+        // Don't do anything shoebody related if this isn't the current map
+        if (Find.CurrentMap != map)
+        {
+            if (!(_sustainer == null || _sustainer.Ended))
+            {
+                _sustainer.End();
+                _sustainer = null;
+            }
+
+            return;
+        }
+        
         if (ShoebodyModSettings.CurrentEnabledSetting)
         {
-            // TODO: If a sustainer exists in two maps, only the latest one will play
-            // but the music will still fade out in the earlier map as if its sustainer is still playing.
-            // Only really a problem if base gets raided while fighting in another map.
             var closestThing = FindClosestEligibleThing();
             MaintainSustainer(closestThing);
         }
