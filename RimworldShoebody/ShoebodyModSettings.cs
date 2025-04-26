@@ -16,6 +16,9 @@ public class ShoebodyModSettings : ModSettings
     public static bool CurrentSilenceMusicSetting =>
         LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().SilenceMusic;
     
+    public static bool CurrentFreshCorpsesSetting =>
+        LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().OnlyFreshCorpses;
+    
     public bool ShoebodyEnabled = true;
 
     public float ShoebodyVolume = 25f;
@@ -23,6 +26,8 @@ public class ShoebodyModSettings : ModSettings
     public bool DoubleSpeed = true;
 
     public bool SilenceMusic = true;
+
+    public bool OnlyFreshCorpses = true;
     
     public override void ExposeData()
     {
@@ -30,5 +35,6 @@ public class ShoebodyModSettings : ModSettings
         Scribe_Values.Look(ref ShoebodyVolume, "shoebodyVolume", 25f);
         Scribe_Values.Look(ref DoubleSpeed, "shoebodyDoubleSpeed", true);
         Scribe_Values.Look(ref SilenceMusic, "shoebodySilenceMusic", true);
+        Scribe_Values.Look(ref OnlyFreshCorpses, "shoebodyOnlyFreshCorpses", true);
     }
 }

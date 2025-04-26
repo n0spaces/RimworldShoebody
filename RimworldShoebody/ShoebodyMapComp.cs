@@ -9,7 +9,7 @@ namespace RimworldShoebody;
 [UsedImplicitly]
 public class ShoebodyMapComp(Map map) : MapComponent(map)
 {
-    private const int MaxCorpseAgeTicks = 7200; // 2 minutes in real time
+    private const int MaxCorpseAgeTicks = 10800; // 3 minutes in real time
 
     private static readonly ThingRequest CorpseThingRequest = ThingRequest.ForGroup(ThingRequestGroup.Corpse);
 
@@ -161,5 +161,6 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
     private bool IsOverWater(Thing thing) => map.terrainGrid.TerrainAt(thing.Position).IsWater;
 
     private static bool IsEligibleCorpse(Corpse corpse) =>
-        (corpse.InnerPawn?.RaceProps.Humanlike ?? false) && corpse.Age < MaxCorpseAgeTicks;
+        (corpse.InnerPawn?.RaceProps.Humanlike ?? false)
+        && (!ShoebodyModSettings.CurrentFreshCorpsesSetting || corpse.Age < MaxCorpseAgeTicks);
 }
