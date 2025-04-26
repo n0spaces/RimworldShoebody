@@ -28,8 +28,12 @@ public class ShoebodyMod : Mod
         _settings.ShoebodyVolume = listing.SliderLabeled($"Volume: {_settings.ShoebodyVolume * 100:f0}%",
             _settings.ShoebodyVolume, 0f, 1f, 0.3f, "Volume of the Shoebody Bop. Default is 35%");
 
-        listing.CheckboxLabeled("Use 2x speed", ref _settings.DoubleSpeed,
-            "Whether to play the double-speed version of the Shoebody Bop.");
+        listing.CheckboxLabeled("Use 2x speed version", ref _settings.DoubleSpeed,
+            "Whether to play the double-speed version of the song.");
+
+        listing.CheckboxLabeled("Silence game music when audible", ref _settings.SilenceMusic,
+            "Whether to silence the game music whenever the Shoebody Bop can be heard. " +
+            "Similar to how other musical instruments work in this game.");
 
         listing.End();
     }
