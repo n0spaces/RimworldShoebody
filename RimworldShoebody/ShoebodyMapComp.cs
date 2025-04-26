@@ -9,17 +9,13 @@ namespace RimworldShoebody;
 [UsedImplicitly]
 public class ShoebodyMapComp(Map map) : MapComponent(map)
 {
-    private const int MaxCorpseAgeTicks = 3600; // 1 minute in real time
+    private const int MaxCorpseAgeTicks = 7200; // 2 minutes in real time
 
     private static readonly ThingRequest CorpseThingRequest = ThingRequest.ForGroup(ThingRequestGroup.Corpse);
 
     private Sustainer? _sustainer;
 
     public Thing? CurrentShoebodyThing => _sustainer?.info.Maker.Thing;
-
-    public override void FinalizeInit()
-    {
-    }
 
     public override void MapComponentTick()
     {
@@ -80,6 +76,16 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
 
     private void MaintainSustainer(Thing? closestThing)
     {
+        // Check if 2x setting changed, and stop this sustainer if it did
+        // TODO: there's a better way to trigger this than checking it every frame
+        // also get rid of these magic strings
+        var shouldBeDoubleSpeed = ShoebodyModSettings.CurrentDoubleSpeedSetting;
+        if (_sustainer?.def.defName == (shouldBeDoubleSpeed ? "Shoebody_Sound" : "Shoebody_Sound2x"))
+        {
+            _sustainer.End();
+            _sustainer = null;
+        }
+        
         // Sustainer not running
         if (_sustainer == null)
         {

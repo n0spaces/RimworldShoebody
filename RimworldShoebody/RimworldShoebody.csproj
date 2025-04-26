@@ -8,15 +8,14 @@
 
   <PropertyGroup>
     <!-- Update this path to match your Rimworld folder -->
-    <RimworldPath>E:\SteamLibrary\steamapps\common\RimWorld</RimworldPath>
+<!--    <RimworldPath>E:\SteamLibrary\steamapps\common\RimWorld</RimworldPath>-->
+    <RimworldPath>E:\Code\rimworld\Rimworld_Debug\RimWorld</RimworldPath>
     <ModName>Shoebody</ModName>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>$(RimworldPath)\Mods\$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>None</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,16 +31,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Defs" />
-    <Folder Include="Languages" />
-    <Folder Include="Sounds" />
-    <Folder Include="Textures" />
+    <Folder Include="Defs"/>
+    <Folder Include="Languages"/>
+    <Folder Include="Sounds"/>
+    <Folder Include="Textures"/>
     <None Update="About\*;Defs\*;Languages\*;Patches\*;Sounds\*;Textures\*" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
   <!-- Move dll to Assemblies folder -->
   <Target Name="MoveAssembly" AfterTargets="Build">
     <Move SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFolder="$(OutputPath)\Assemblies"/>
+    <Move SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFolder="$(OutputPath)\Assemblies" ContinueOnError="true"/>
   </Target>
 
 </Project>

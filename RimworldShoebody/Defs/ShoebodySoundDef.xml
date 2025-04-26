@@ -18,6 +18,41 @@
         <muteWhenPaused>true</muteWhenPaused>
         <distRange>15~30</distRange>
         <volumeRange>100</volumeRange>
+        <randomStartPoint>true</randomStartPoint>
+        <paramMappings>
+          <li>
+            <inParam Class="SoundParamSource_External">
+              <inParamName>ShoebodySound_VolumeParam</inParamName>
+              <defaultValue>0.35</defaultValue>
+            </inParam>
+            <outParam Class="SoundParamTarget_Volume"/>
+            <paramUpdateMode>Constant</paramUpdateMode>
+          </li>
+        </paramMappings>
+      </li>
+    </subSounds>
+  </SoundDef>
+  
+  <!-- 2x speed -->
+  <SoundDef>
+    <defName>Shoebody_Sound2x</defName>
+    <sustain>True</sustain>
+    <context>MapOnly</context>
+    <priorityMode>PrioritizeNearest</priorityMode>
+    <maxSimultaneous>3</maxSimultaneous>
+    <sustainFadeoutTime>3.0</sustainFadeoutTime>
+    <subSounds>
+      <li>
+        <grains>
+          <li Class="AudioGrain_Clip">
+            <clipPath>shoebody2x</clipPath>
+          </li>
+        </grains>
+        <name>ShoebodySubSoundDef</name>
+        <muteWhenPaused>true</muteWhenPaused>
+        <distRange>15~30</distRange>
+        <volumeRange>100</volumeRange>
+        <randomStartPoint>true</randomStartPoint>
         <paramMappings>
           <li>
             <inParam Class="SoundParamSource_External">
