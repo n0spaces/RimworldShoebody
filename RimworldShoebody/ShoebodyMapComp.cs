@@ -6,6 +6,9 @@ using Verse.Sound;
 
 namespace RimworldShoebody;
 
+/// <summary>
+/// Main component that manages the Shoebody audio in the map.
+/// </summary>
 [UsedImplicitly]
 public class ShoebodyMapComp(Map map) : MapComponent(map)
 {
@@ -30,7 +33,7 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
 
             return;
         }
-        
+
         if (ShoebodyModSettings.CurrentEnabledSetting)
         {
             var closestThing = FindClosestEligibleThing();
@@ -86,15 +89,13 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
     private void MaintainSustainer(Thing? closestThing)
     {
         // Check if 2x setting changed, and stop this sustainer if it did
-        // TODO: there's a better way to trigger this than checking it every frame
-        // also get rid of these magic strings
         var shouldBeDoubleSpeed = ShoebodyModSettings.CurrentDoubleSpeedSetting;
         if (_sustainer?.def.defName == (shouldBeDoubleSpeed ? "Shoebody_Sound" : "Shoebody_Sound2x"))
         {
             _sustainer.End();
             _sustainer = null;
         }
-        
+
         // Sustainer not running
         if (_sustainer == null)
         {
@@ -109,9 +110,8 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
             _sustainer = ShoebodySustainerHelpers.Create(closestThing);
             return;
         }
-        
+
         // Update volume in case setting changed
-        // TODO: trigger with event instead
         _sustainer.externalParams["ShoebodySound_VolumeParam"] = ShoebodyModSettings.CurrentVolumeSetting;
 
         // prevClosestThing is the closest eligible thing from the last time SoundInfo was updated

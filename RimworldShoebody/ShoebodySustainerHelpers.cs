@@ -13,7 +13,7 @@ public static class ShoebodySustainerHelpers
         var shoebodySustainers = allSustainers.Where(s => !s.Ended && s.def.defName.StartsWith("Shoebody_Sound"));
         return shoebodySustainers;
     }
-    
+
     public static Sustainer Create(TargetInfo maker)
     {
         var soundDef = ShoebodyModSettings.CurrentDoubleSpeedSetting
@@ -23,7 +23,7 @@ public static class ShoebodySustainerHelpers
         s.externalParams["ShoebodySound_VolumeParam"] = ShoebodyModSettings.CurrentVolumeSetting;
         return s;
     }
-    
+
     public static void EndAll()
     {
         foreach (var sustainer in FindAll())

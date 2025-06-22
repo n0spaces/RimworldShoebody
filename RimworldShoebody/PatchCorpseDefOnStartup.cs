@@ -2,6 +2,10 @@
 
 namespace RimworldShoebody;
 
+/// <summary>
+/// Patches the Corpse_Human things so they get the ThingPlaysShoebodyComp component.
+/// This is needed because corpses are defined dynamically at startup, rather than in XML.
+/// </summary>
 [StaticConstructorOnStartup]
 public static class PatchCorpseDefOnStartup
 {

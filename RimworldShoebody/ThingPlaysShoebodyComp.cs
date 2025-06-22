@@ -21,7 +21,7 @@ public class ThingPlaysShoebodyComp : CompPlaysMusic
             {
                 return false;
             }
-            
+
             return Find.CurrentMap.GetComponent<ShoebodyMapComp>()?.CurrentShoebodyThing == parent;
         }
     }
