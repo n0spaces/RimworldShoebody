@@ -8,8 +8,8 @@
 
   <PropertyGroup>
     <!-- Update this path to match your Rimworld folder -->
-<!--    <RimworldPath>E:\SteamLibrary\steamapps\common\RimWorld</RimworldPath>-->
-    <RimworldPath>E:\Code\rimworld\Rimworld_Debug\RimWorld</RimworldPath>
+    <!--<RimworldPath>E:\SteamLibrary\steamapps\common\RimWorld</RimworldPath>-->
+    <RimworldPath>E:\Code\rimworld\Rimworld_Debug\RimWorld1.6</RimworldPath>
     <ModName>Shoebody</ModName>
   </PropertyGroup>
 
