@@ -13,6 +13,17 @@ namespace RimworldShoebody;
 /// </summary>
 public class ThingPlaysShoebodyComp : CompPlaysMusic
 {
+    /// <summary>
+    /// This is static so we can change the sound range to match the sub sound's DistRange setting
+    /// (though this doesn't seem to actually change anything...)
+    /// </summary>
+    internal static FloatRange StaticSoundRange;
+
+    static ThingPlaysShoebodyComp()
+    {
+        StaticSoundRange = SoundDef.Named("Shoebody_Sound").subSounds[0].distRange;
+    }
+    
     public override bool Playing
     {
         get
@@ -26,5 +37,5 @@ public class ThingPlaysShoebodyComp : CompPlaysMusic
         }
     }
 
-    public override FloatRange SoundRange { get; } = SoundDef.Named("Shoebody_Sound").subSounds[0].distRange;
+    public override FloatRange SoundRange => StaticSoundRange;
 }

@@ -19,6 +19,9 @@ public class ShoebodyModSettings : ModSettings
     public static bool CurrentFreshCorpsesSetting =>
         LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().OnlyFreshCorpses;
 
+    public static IntRange CurrentDistRangeSetting =>
+        LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().DistRange;
+
     public bool ShoebodyEnabled = true;
 
     public float ShoebodyVolume = 25f;
@@ -29,6 +32,8 @@ public class ShoebodyModSettings : ModSettings
 
     public bool OnlyFreshCorpses = true;
 
+    public IntRange DistRange = new(15, 30);
+
     public override void ExposeData()
     {
         Scribe_Values.Look(ref ShoebodyEnabled, "shoebodyEnabled", true);
@@ -36,5 +41,6 @@ public class ShoebodyModSettings : ModSettings
         Scribe_Values.Look(ref DoubleSpeed, "shoebodyDoubleSpeed", true);
         Scribe_Values.Look(ref SilenceMusic, "shoebodySilenceMusic", true);
         Scribe_Values.Look(ref OnlyFreshCorpses, "shoebodyOnlyFreshCorpses", true);
+        Scribe_Values.Look(ref DistRange, "shoebodyDistRange", new IntRange(15, 30));
     }
 }

@@ -8,25 +8,27 @@
 
   <PropertyGroup>
     <!-- Update this path to match your Rimworld folder -->
-    <!--<RimworldPath>E:\SteamLibrary\steamapps\common\RimWorld</RimworldPath>-->
-    <RimworldPath>E:\Code\rimworld\Rimworld_Debug\RimWorld1.6</RimworldPath>
+    <!--<RimworldPath>E:/SteamLibrary/steamapps/common/RimWorld</RimworldPath>-->
+    <!--<RimworldDataPath>RimWorldWin64_Data</RimworldDataPath>-->
+    <RimworldPath>/home/mschw/source/rimworld-mods/RimworldDebug/RimWorld1.6</RimworldPath>
+    <RimworldDataPath>RimWorldLinux_Data</RimworldDataPath>
     <ModName>Shoebody</ModName>
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>$(RimworldPath)\Mods\$(AssemblyName)</OutputPath>
+    <OutputPath>$(RimworldPath)/Mods/$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp" Private="false">
-      <HintPath>$(RimworldPath)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(RimworldPath)/$(RimworldDataPath)/Managed/Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine" Private="false">
-      <HintPath>$(RimworldPath)\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>$(RimworldPath)/$(RimworldDataPath)/Managed/UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule" Private="false">
-      <HintPath>$(RimworldPath)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(RimworldPath)/$(RimworldDataPath)/Managed/UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -35,13 +37,13 @@
     <Folder Include="Languages"/>
     <Folder Include="Sounds"/>
     <Folder Include="Textures"/>
-    <None Update="About\*;Defs\*;Languages\*;Patches\*;Sounds\*;Textures\*" CopyToOutputDirectory="PreserveNewest"/>
+    <None Update="About/*;Defs/*;Languages/*;Patches/*;Sounds/*;Textures/*" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
   <!-- Move dll to Assemblies folder -->
   <Target Name="MoveAssembly" AfterTargets="Build">
-    <Move SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFolder="$(OutputPath)\Assemblies"/>
-    <Move SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFolder="$(OutputPath)\Assemblies" ContinueOnError="true"/>
+    <Move SourceFiles="$(OutputPath)/$(AssemblyName).dll" DestinationFolder="$(OutputPath)/Assemblies"/>
+    <Move SourceFiles="$(OutputPath)/$(AssemblyName).pdb" DestinationFolder="$(OutputPath)/Assemblies" ContinueOnError="true"/>
   </Target>
 
 </Project>
