@@ -41,26 +41,31 @@ public class ShoebodyMod : Mod
                 "If checked, Shoebody will play on human-like corpses only if they are fresh (about 3 minutes old in real-time).\n\n" +
                 "If unchecked, Shoebody will play on all human-like corpses, regardless of how old or decomposing they are.");
 
-            listing.Label("Camera distance range",
-                tooltip: "Camera distance range that determines the Shoebody volume.\n\n" +
-                         "When the distance from the camera to the Shoebody source is below the range minimum, the " +
-                         "Shoebody will play the loudest. The Shoebody will fade out as the camera gets further away " +
-                         "until it reaches the range maximum. This is identical to how musical instruments work.\n\n" +
-                         "Default is 15~30. Increase this if you want to hear the Shoebody from further away. " +
-                         "Note that the \"Silence game music when audible\" option may not work accurately if this is changed.");
+            listing.Gap();
+            
+            const string distRangeTooltip =
+                "The distance that the camera must be from the Shoebody pawn for it to be audible.\n\n" +
+                "This works like musical instruments. At the minimum distance, " +
+                "the Shoebody can be heard at its full volume. At the maximum, it can't be heard.\n\n" +
+                "Default is 15~30. Increase the maximum if you want to hear the Shoebody from further away.\n\n" +
+                "Warning: this is a bit finicky. Keep in mind if you change this value:\n" +
+                " - This setting is applied the next time Shoebody plays from the start.\n" + 
+                " - This behavior might be buggy if the range is too high or low, or if the min and max are equal.\n" +
+                " - The \"Silence game music when audible\" option may not accurately reflect this range.";
 
             var oldDistRange = _settings.DistRange;
-            
-            listing.IntRange(ref _settings.DistRange, 0, 200);
-            
+            listing.IntRangeLabeled("Camera distance range", ref _settings.DistRange, 0, 200, 0.3f, distRangeTooltip);
+
             // Update SubSoundDefs if DistRange was modified
             if (oldDistRange != _settings.DistRange)
             {
                 ShoebodyDistRangeHelper.UpdateSubSoundDefDistRange();
             }
         }
+        
+        listing.Gap();
 
-        listing.Label("(These settings might take a few seconds to apply if the Shoebody is currently playing.)");
+        listing.Label("(These settings might not apply immediately if the Shoebody is currently playing.)");
 
         listing.End();
     }
