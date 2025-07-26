@@ -21,6 +21,9 @@ public class ShoebodyModSettings : ModSettings
 
     public static IntRange CurrentDistRangeSetting =>
         LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().DistRange;
+    
+    public static bool CurrentPsychicRitualSetting =>
+        LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().PlayOnPsychicRituals;
 
     public bool ShoebodyEnabled = true;
 
@@ -34,6 +37,8 @@ public class ShoebodyModSettings : ModSettings
 
     public IntRange DistRange = new(15, 30);
 
+    public bool PlayOnPsychicRituals = true;
+
     public override void ExposeData()
     {
         Scribe_Values.Look(ref ShoebodyEnabled, "shoebodyEnabled", true);
@@ -42,5 +47,6 @@ public class ShoebodyModSettings : ModSettings
         Scribe_Values.Look(ref SilenceMusic, "shoebodySilenceMusic", true);
         Scribe_Values.Look(ref OnlyFreshCorpses, "shoebodyOnlyFreshCorpses", true);
         Scribe_Values.Look(ref DistRange, "shoebodyDistRange", new IntRange(15, 30));
+        Scribe_Values.Look(ref PlayOnPsychicRituals, "shoebodyPsychicRituals", true);
     }
 }

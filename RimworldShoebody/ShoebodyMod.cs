@@ -40,6 +40,9 @@ public class ShoebodyMod : Mod
             listing.CheckboxLabeled("Only trigger for fresh corpses", ref _settings.OnlyFreshCorpses,
                 "If checked, Shoebody will play on human-like corpses only if they are fresh (about 3 minutes old in real-time).\n\n" +
                 "If unchecked, Shoebody will play on all human-like corpses, regardless of how old or decomposing they are.");
+            
+            listing.CheckboxLabeled("Play during psychic rituals", ref _settings.PlayOnPsychicRituals,
+                "Whether to play the Shoebody on pawns invoking a psychic ritual. Requires Anomaly expansion.");
 
             listing.Gap();
             
@@ -65,7 +68,7 @@ public class ShoebodyMod : Mod
         
         listing.Gap();
 
-        listing.Label("(These settings might not apply immediately if the Shoebody is currently playing.)");
+        listing.Label("(These settings might take a few seconds to apply if the Shoebody is currently playing.)");
 
         listing.End();
     }

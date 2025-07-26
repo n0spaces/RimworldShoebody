@@ -70,7 +70,15 @@ public class ShoebodyMapComp(Map map) : MapComponent(map)
                            || pawn.Downed
                            || (pawn.carryTracker.CarriedThing is Corpse corpse && IsEligibleCorpse(corpse)));
 
-        var eligibleThings = corpseInnerPawns.Concat(pawnThings);
+        // If Anomaly expansion is active and the setting is enabled, also find pawns invoking a psychic ritual
+        var shouldFindInvokingPawns = ExpansionDefOf.Anomaly.Status == ExpansionStatus.Active &&
+                                      ShoebodyModSettings.CurrentPsychicRitualSetting;
+        
+        var invokingPawns = shouldFindInvokingPawns
+            ? map.mapPawns.AllHumanlikeSpawned.Where(pawn => pawn.mindState?.duty?.def == DutyDefOf.Invoke)
+            : [];
+
+        var eligibleThings = corpseInnerPawns.Concat(pawnThings).Concat(invokingPawns);
 
         var cameraPos = Find.CameraDriver.MapPosition;
 
