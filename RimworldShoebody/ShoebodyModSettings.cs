@@ -21,32 +21,47 @@ public class ShoebodyModSettings : ModSettings
 
     public static IntRange CurrentDistRangeSetting =>
         LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().DistRange;
-    
+
     public static bool CurrentPsychicRitualSetting =>
         LoadedModManager.GetMod<ShoebodyMod>().GetSettings<ShoebodyModSettings>().PlayOnPsychicRituals;
 
-    public bool ShoebodyEnabled = true;
+    private const bool DefaultShoebodyEnabled = true;
+    private const float DefaultShoebodyVolume = 0.35f;
+    private const bool DefaultDoubleSpeed = true;
+    private const bool DefaultSilenceMusic = true;
+    private const bool DefaultOnlyFreshCorpses = true;
+    private static readonly IntRange DefaultDistRange = new(15, 30);
+    private const bool DefaultPlayOnPsychicRituals = true;
 
-    public float ShoebodyVolume = 25f;
+    public bool ShoebodyEnabled;
+    public float ShoebodyVolume;
+    public bool DoubleSpeed;
+    public bool SilenceMusic;
+    public bool OnlyFreshCorpses;
+    public IntRange DistRange;
+    public bool PlayOnPsychicRituals;
 
-    public bool DoubleSpeed = true;
-
-    public bool SilenceMusic = true;
-
-    public bool OnlyFreshCorpses = true;
-
-    public IntRange DistRange = new(15, 30);
-
-    public bool PlayOnPsychicRituals = true;
-
+    public ShoebodyModSettings() => SetDefaults();
+    
+    public void SetDefaults()
+    {
+        ShoebodyEnabled = DefaultShoebodyEnabled;
+        ShoebodyVolume = DefaultShoebodyVolume;
+        DoubleSpeed = DefaultDoubleSpeed;
+        SilenceMusic = DefaultSilenceMusic;
+        OnlyFreshCorpses = DefaultOnlyFreshCorpses;
+        DistRange = DefaultDistRange;
+        PlayOnPsychicRituals = DefaultPlayOnPsychicRituals;
+    }
+    
     public override void ExposeData()
     {
-        Scribe_Values.Look(ref ShoebodyEnabled, "shoebodyEnabled", true);
-        Scribe_Values.Look(ref ShoebodyVolume, "shoebodyVolume", 25f);
-        Scribe_Values.Look(ref DoubleSpeed, "shoebodyDoubleSpeed", true);
-        Scribe_Values.Look(ref SilenceMusic, "shoebodySilenceMusic", true);
-        Scribe_Values.Look(ref OnlyFreshCorpses, "shoebodyOnlyFreshCorpses", true);
-        Scribe_Values.Look(ref DistRange, "shoebodyDistRange", new IntRange(15, 30));
-        Scribe_Values.Look(ref PlayOnPsychicRituals, "shoebodyPsychicRituals", true);
+        Scribe_Values.Look(ref ShoebodyEnabled, "shoebodyEnabled", DefaultShoebodyEnabled);
+        Scribe_Values.Look(ref ShoebodyVolume, "shoebodyVolume", DefaultShoebodyVolume);
+        Scribe_Values.Look(ref DoubleSpeed, "shoebodyDoubleSpeed", DefaultDoubleSpeed);
+        Scribe_Values.Look(ref SilenceMusic, "shoebodySilenceMusic", DefaultSilenceMusic);
+        Scribe_Values.Look(ref OnlyFreshCorpses, "shoebodyOnlyFreshCorpses", DefaultOnlyFreshCorpses);
+        Scribe_Values.Look(ref DistRange, "shoebodyDistRange", DefaultDistRange);
+        Scribe_Values.Look(ref PlayOnPsychicRituals, "shoebodyPsychicRituals", DefaultPlayOnPsychicRituals);
     }
 }
